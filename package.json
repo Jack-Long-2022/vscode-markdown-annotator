@@ -2,7 +2,7 @@
   "name": "vscode-markdown-annotator",
   "displayName": "Markdown Annotator",
   "description": "Add annotations, highlights and comments to Markdown documents",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "jack-long",
   "engines": {
     "vscode": "^1.85.0"
@@ -18,83 +18,105 @@
     "commands": [
       {
         "command": "markdownAnnotator.addHighlight",
-        "title": "📝 添加高亮（选择颜色）"
+        "title": "📝 Markdown Annotator: 添加高亮（选择颜色）"
       },
       {
         "command": "markdownAnnotator.quickHighlight",
-        "title": "⚡ 快速高亮（默认颜色）"
+        "title": "⚡ Markdown Annotator: 快速高亮（默认颜色）"
       },
       {
         "command": "markdownAnnotator.addComment",
-        "title": "💬 添加注释"
+        "title": "💬 Markdown Annotator: 添加注释"
       },
       {
         "command": "markdownAnnotator.listAnnotations",
-        "title": "📋 查看所有标注"
+        "title": "📋 Markdown Annotator: 查看所有标注"
       },
       {
         "command": "markdownAnnotator.clearAll",
-        "title": "🗑️ 清除当前文件高亮"
+        "title": "🗑️ Markdown Annotator: 清除当前文件高亮"
       },
       {
         "command": "markdownAnnotator.exportAnnotations",
-        "title": "📤 导出所有标注"
+        "title": "📤 Markdown Annotator: 导出所有标注"
       }
     ],
     "menus": {
       "editor/context": [
         {
           "when": "editorLangId == markdown",
-          "command": "markdownAnnotator.quickHighlight",
+          "submenu": "markdownAnnotator.submenu",
           "group": "markdown@1"
+        }
+      ],
+      "markdownAnnotator.submenu": [
+        {
+          "command": "markdownAnnotator.quickHighlight",
+          "group": "1_highlight@1"
         },
         {
-          "when": "editorLangId == markdown",
+          "command": "markdownAnnotator.addHighlight",
+          "group": "1_highlight@2"
+        },
+        {
           "command": "markdownAnnotator.addComment",
-          "group": "markdown@2"
+          "group": "2_comment@1"
         },
         {
-          "when": "editorLangId == markdown",
           "command": "markdownAnnotator.listAnnotations",
-          "group": "markdown@3"
+          "group": "3_manage@1"
+        },
+        {
+          "command": "markdownAnnotator.clearAll",
+          "group": "3_manage@2"
+        },
+        {
+          "command": "markdownAnnotator.exportAnnotations",
+          "group": "3_manage@3"
         }
       ]
     },
+    "submenus": [
+      {
+        "id": "markdownAnnotator.submenu",
+        "label": "📝 Markdown 标注"
+      }
+    ],
     "keybindings": [
       {
         "command": "markdownAnnotator.quickHighlight",
-        "key": "ctrl+h",
-        "mac": "cmd+h",
+        "key": "alt+h",
+        "mac": "alt+h",
         "when": "editorTextFocus && editorLangId == markdown"
       },
       {
         "command": "markdownAnnotator.addHighlight",
-        "key": "ctrl+shift+h",
-        "mac": "cmd+shift+h",
+        "key": "alt+shift+h",
+        "mac": "alt+shift+h",
         "when": "editorTextFocus && editorLangId == markdown"
       },
       {
         "command": "markdownAnnotator.addComment",
-        "key": "ctrl+shift+c",
-        "mac": "cmd+shift+c",
+        "key": "alt+shift+c",
+        "mac": "alt+shift+c",
         "when": "editorTextFocus && editorLangId == markdown"
       },
       {
         "command": "markdownAnnotator.listAnnotations",
-        "key": "ctrl+l",
-        "mac": "cmd+l",
+        "key": "alt+l",
+        "mac": "alt+l",
         "when": "editorTextFocus && editorLangId == markdown"
       },
       {
         "command": "markdownAnnotator.clearAll",
-        "key": "ctrl+shift+d",
-        "mac": "cmd+shift+d",
+        "key": "alt+shift+d",
+        "mac": "alt+shift+d",
         "when": "editorTextFocus && editorLangId == markdown"
       },
       {
         "command": "markdownAnnotator.exportAnnotations",
-        "key": "ctrl+shift+e",
-        "mac": "cmd+shift+e",
+        "key": "alt+shift+e",
+        "mac": "alt+shift+e",
         "when": "editorTextFocus && editorLangId == markdown"
       }
     ],
