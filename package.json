@@ -2,7 +2,7 @@
   "name": "vscode-markdown-annotator",
   "displayName": "Markdown Annotator",
   "description": "Add annotations, highlights and comments to Markdown documents",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "publisher": "jack-long",
   "engines": {
     "vscode": "^1.85.0"
@@ -81,7 +81,13 @@
         "markdownAnnotator.highlightColor": {
           "type": "string",
           "default": "yellow",
-          "enum": ["yellow", "green", "blue", "pink", "orange"],
+          "enum": [
+            "yellow",
+            "green",
+            "blue",
+            "pink",
+            "orange"
+          ],
           "enumDescriptions": [
             "黄色高亮",
             "绿色高亮",
@@ -116,7 +122,13 @@
     "type": "git",
     "url": "git+https://github.com/Jack-Long-2022/vscode-markdown-annotator.git"
   },
-  "keywords": ["markdown", "annotation", "highlight", "comment", "note-taking"],
+  "keywords": [
+    "markdown",
+    "annotation",
+    "highlight",
+    "comment",
+    "note-taking"
+  ],
   "author": "Jack Long",
   "type": "commonjs",
   "bugs": {

@@ -1,5 +1,4 @@
 const vscode = require('vscode');
-const path = require('path');
 const fs = require('fs');
 
 let annotations = new Map(); // Store annotations by file path
@@ -46,14 +45,14 @@ function activate(context) {
             borderRadius: '3px',
             isWholeLine: false
         }),
-        orange: vscode.window.createTextEditorDecorationType({
+        orange: vscode.window.createTextEditorType({
             backgroundColor: 'rgba(255, 165, 0, 0.35)',
             borderRadius: '3px',
             isWholeLine: false
         })
     };
 
-    // ==================== 添加高亮 ====================
+    // ==================== 添加高亮（选择颜色）====================
     const addHighlightCmd = vscode.commands.registerCommand(
         'markdownAnnotator.addHighlight',
         async () => {
@@ -72,26 +71,20 @@ function activate(context) {
             const config = vscode.workspace.getConfiguration('markdownAnnotator');
             const defaultColor = config.get('highlightColor') || 'yellow';
             
-            const showColorPicker = config.get('alwaysShowColorPicker', true);
+            const picked = await vscode.window.showQuickPick(
+                [
+                    { label: '🟡 黄色', value: 'yellow' },
+                    { label: '🟢 绿色', value: 'green' },
+                    { label: '🔵 蓝色', value: 'blue' },
+                    { label: '🩷 粉色', value: 'pink' },
+                    { label: '🟠 橙色', value: 'orange' }
+                ],
+                { placeHolder: `选择高亮颜色` }
+            );
+            if (!picked) return;
             
-            let color = defaultColor;
-            if (showColorPicker) {
-                const picked = await vscode.window.showQuickPick(
-                    [
-                        { label: '🟡 黄色 (Yellow)', value: 'yellow' },
-                        { label: '🟢 绿色 (Green)', value: 'green' },
-                        { label: '🔵 蓝色 (Blue)', value: 'blue' },
-                        { label: '🩷 粉色 (Pink)', value: 'pink' },
-                        { label: '🟠 橙色 (Orange)', value: 'orange' }
-                    ],
-                    { placeHolder: `选择高亮颜色（默认: ${defaultColor}）` }
-                );
-                if (!picked) return;
-                color = picked.value;
-            }
-
+            const color = picked.value;
             const range = new vscode.Range(selection.start, selection.end);
-            const decorationType = decorationTypes[color];
             
             // 获取当前文件已有的高亮，追加新的
             const filePath = editor.document.uri.fsPath;
@@ -104,7 +97,7 @@ function activate(context) {
                 ));
             
             existingRanges.push(range);
-            editor.setDecorations(decorationType, existingRanges);
+            editor.setDecorations(decorationTypes[color], existingRanges);
 
             // 存储标注
             const annotation = {
@@ -124,6 +117,59 @@ function activate(context) {
             annotations.get(filePath).push(annotation);
 
             vscode.window.showInformationMessage(`✅ 已添加 ${color} 高亮`);
+        }
+    );
+
+    // ==================== 快速高亮 ====================
+    const quickHighlightCmd = vscode.commands.registerCommand(
+        'markdownAnnotator.quickHighlight',
+        async () => {
+            const editor = vscode.window.activeTextEditor;
+            if (!editor || editor.document.languageId !== 'markdown') {
+                vscode.window.showWarningMessage('请在 Markdown 文件中使用此功能');
+                return;
+            }
+
+            const selection = editor.selection;
+            if (selection.isEmpty) {
+                vscode.window.showWarningMessage('请先选择要高亮的文字');
+                return;
+            }
+
+            const config = vscode.workspace.getConfiguration('markdownAnnotator');
+            const color = config.get('highlightColor') || 'yellow';
+
+            const range = new vscode.Range(selection.start, selection.end);
+            
+            const filePath = editor.document.uri.fsPath;
+            const fileAnnotations = annotations.get(filePath) || [];
+            const existingRanges = fileAnnotations
+                .filter(a => a.type === 'highlight' && a.color === color)
+                .map(a => new vscode.Range(
+                    a.range.start.line, a.range.start.character,
+                    a.range.end.line, a.range.end.character
+                ));
+            
+            existingRanges.push(range);
+            editor.setDecorations(decorationTypes[color], existingRanges);
+
+            const annotation = {
+                type: 'highlight',
+                color: color,
+                range: {
+                    start: { line: selection.start.line, character: selection.start.character },
+                    end: { line: selection.end.line, character: selection.end.character }
+                },
+                text: editor.document.getText(range),
+                timestamp: Date.now()
+            };
+
+            if (!annotations.has(filePath)) {
+                annotations.set(filePath, []);
+            }
+            annotations.get(filePath).push(annotation);
+
+            console.log(`Quick highlight added in ${color}`);
         }
     );
 
@@ -161,14 +207,12 @@ function activate(context) {
             const lineLength = editor.document.lineAt(endLine).text.length;
             const endPosition = new vscode.Position(endLine, lineLength);
 
-            // 插入注释（带时间戳）
             const commentText = `\n<!-- 💬 [${getTimestamp()}] ${comment} -->`;
 
             await editor.edit(editBuilder => {
                 editBuilder.insert(endPosition, commentText);
             });
 
-            // 存储标注
             const filePath = editor.document.uri.fsPath;
             const annotation = {
                 type: 'comment',
@@ -186,11 +230,11 @@ function activate(context) {
             }
             annotations.get(filePath).push(annotation);
 
-            vscode.window.showInformationMessage('✅ 注释已添加到文件末尾');
+            vscode.window.showInformationMessage('✅ 注释已添加');
         }
     );
 
-    // ==================== 清除当前文件所有标注 ====================
+    // ==================== 清除高亮 ====================
     const clearAllCmd = vscode.commands.registerCommand(
         'markdownAnnotator.clearAll',
         async () => {
@@ -206,8 +250,17 @@ function activate(context) {
                 return;
             }
 
+            const fileAnnotations = annotations.get(filePath);
+            const highlightCount = fileAnnotations.filter(a => a.type === 'highlight').length;
+            const commentCount = fileAnnotations.filter(a => a.type === 'comment').length;
+
+            if (highlightCount === 0) {
+                vscode.window.showInformationMessage('当前文件没有高亮可清除');
+                return;
+            }
+
             const confirm = await vscode.window.showWarningMessage(
-                '确定要清除当前文件的所有标注吗？（高亮会被清除，注释会保留在文件中）',
+                `清除当前文件的所有高亮？\n\n🎨 高亮: ${highlightCount} 个（将被清除）\n💬 注释: ${commentCount} 个（保留在文件和记录中）`,
                 { modal: true },
                 '清除高亮'
             );
@@ -218,8 +271,16 @@ function activate(context) {
                     editor.setDecorations(type, []);
                 });
 
-                annotations.delete(filePath);
-                vscode.window.showInformationMessage('✅ 已清除所有高亮（注释保留在文件中）');
+                // 只删除高亮记录，保留注释记录
+                const remainingAnnotations = fileAnnotations.filter(a => a.type !== 'highlight');
+                
+                if (remainingAnnotations.length > 0) {
+                    annotations.set(filePath, remainingAnnotations);
+                    vscode.window.showInformationMessage(`✅ 已清除 ${highlightCount} 个高亮（${commentCount} 个注释保留）`);
+                } else {
+                    annotations.delete(filePath);
+                    vscode.window.showInformationMessage(`✅ 已清除所有高亮`);
+                }
             }
         }
     );
@@ -240,8 +301,12 @@ function activate(context) {
             };
 
             annotations.forEach((value, key) => {
+                const highlights = value.filter(a => a.type === 'highlight');
+                const comments = value.filter(a => a.type === 'comment');
                 exportData.files[key] = {
-                    annotationCount: value.length,
+                    total: value.length,
+                    highlights: highlights.length,
+                    comments: comments.length,
                     annotations: value
                 };
             });
@@ -261,61 +326,6 @@ function activate(context) {
                     vscode.window.showErrorMessage(`导出失败: ${err.message}`);
                 }
             }
-        }
-    );
-
-    // ==================== 快速高亮（使用默认颜色，不弹窗）====================
-    const quickHighlightCmd = vscode.commands.registerCommand(
-        'markdownAnnotator.quickHighlight',
-        async () => {
-            const editor = vscode.window.activeTextEditor;
-            if (!editor || editor.document.languageId !== 'markdown') {
-                vscode.window.showWarningMessage('请在 Markdown 文件中使用此功能');
-                return;
-            }
-
-            const selection = editor.selection;
-            if (selection.isEmpty) {
-                vscode.window.showWarningMessage('请先选择要高亮的文字');
-                return;
-            }
-
-            const config = vscode.workspace.getConfiguration('markdownAnnotator');
-            const color = config.get('highlightColor') || 'yellow';
-
-            const range = new vscode.Range(selection.start, selection.end);
-            const decorationType = decorationTypes[color];
-            
-            const filePath = editor.document.uri.fsPath;
-            const fileAnnotations = annotations.get(filePath) || [];
-            const existingRanges = fileAnnotations
-                .filter(a => a.type === 'highlight' && a.color === color)
-                .map(a => new vscode.Range(
-                    a.range.start.line, a.range.start.character,
-                    a.range.end.line, a.range.end.character
-                ));
-            
-            existingRanges.push(range);
-            editor.setDecorations(decorationType, existingRanges);
-
-            const annotation = {
-                type: 'highlight',
-                color: color,
-                range: {
-                    start: { line: selection.start.line, character: selection.start.character },
-                    end: { line: selection.end.line, character: selection.end.character }
-                },
-                text: editor.document.getText(range),
-                timestamp: Date.now()
-            };
-
-            if (!annotations.has(filePath)) {
-                annotations.set(filePath, []);
-            }
-            annotations.get(filePath).push(annotation);
-
-            // 不弹出提示，避免干扰
-            console.log(`Quick highlight added in ${color}`);
         }
     );
 
@@ -350,11 +360,10 @@ function activate(context) {
             });
 
             const selected = await vscode.window.showQuickPick(items, {
-                placeHolder: `当前文件有 ${fileAnnotations.length} 个标注`
+                placeHolder: `当前文件有 ${fileAnnotations.length} 个标注（${fileAnnotations.filter(a => a.type === 'highlight').length} 个高亮，${fileAnnotations.filter(a => a.type === 'comment').length} 个注释）`
             });
 
             if (selected) {
-                // 跳转到对应位置
                 const ann = fileAnnotations[selected.index];
                 const position = new vscode.Position(ann.range.start.line, ann.range.start.character);
                 editor.selection = new vscode.Selection(position, position);
@@ -405,8 +414,7 @@ function activate(context) {
         }
     });
 
-    // 显示欢迎信息
-    vscode.window.showInformationMessage('📝 Markdown Annotator 已激活！选中文字后按快捷键添加标注。');
+    console.log('Markdown Annotator activated!');
 }
 
 function deactivate() {
