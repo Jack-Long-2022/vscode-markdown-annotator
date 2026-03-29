@@ -67,7 +67,13 @@
         "markdownAnnotator.highlightColor": {
           "type": "string",
           "default": "yellow",
-          "enum": ["yellow", "green", "blue", "pink", "orange"],
+          "enum": [
+            "yellow",
+            "green",
+            "blue",
+            "pink",
+            "orange"
+          ],
           "description": "Default highlight color"
         },
         "markdownAnnotator.showInPreview": {
@@ -82,11 +88,19 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
-    "@types/vscode": "^1.85.0"
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.7.1"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Jack-Long-2022/vscode-markdown-annotator.git"
-  }
+    "url": "git+https://github.com/Jack-Long-2022/vscode-markdown-annotator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Jack-Long-2022/vscode-markdown-annotator/issues"
+  },
+  "homepage": "https://github.com/Jack-Long-2022/vscode-markdown-annotator#readme"
 }
