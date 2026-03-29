@@ -2,7 +2,7 @@
   "name": "vscode-markdown-annotator",
   "displayName": "Markdown Annotator",
   "description": "Add annotations, highlights and comments to Markdown documents",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "jack-long",
   "engines": {
     "vscode": "^1.85.0"
@@ -18,32 +18,45 @@
     "commands": [
       {
         "command": "markdownAnnotator.addHighlight",
-        "title": "Markdown Annotator: Add Highlight"
+        "title": "📝 添加高亮（选择颜色）"
+      },
+      {
+        "command": "markdownAnnotator.quickHighlight",
+        "title": "⚡ 快速高亮（默认颜色）"
       },
       {
         "command": "markdownAnnotator.addComment",
-        "title": "Markdown Annotator: Add Comment"
+        "title": "💬 添加注释"
+      },
+      {
+        "command": "markdownAnnotator.listAnnotations",
+        "title": "📋 查看所有标注"
       },
       {
         "command": "markdownAnnotator.clearAll",
-        "title": "Markdown Annotator: Clear All Annotations"
+        "title": "🗑️ 清除当前文件高亮"
       },
       {
         "command": "markdownAnnotator.exportAnnotations",
-        "title": "Markdown Annotator: Export Annotations"
+        "title": "📤 导出所有标注"
       }
     ],
     "menus": {
       "editor/context": [
         {
           "when": "editorLangId == markdown",
-          "command": "markdownAnnotator.addHighlight",
+          "command": "markdownAnnotator.quickHighlight",
           "group": "markdown@1"
         },
         {
           "when": "editorLangId == markdown",
           "command": "markdownAnnotator.addComment",
           "group": "markdown@2"
+        },
+        {
+          "when": "editorLangId == markdown",
+          "command": "markdownAnnotator.listAnnotations",
+          "group": "markdown@3"
         }
       ]
     },
@@ -55,9 +68,33 @@
         "when": "editorTextFocus && editorLangId == markdown"
       },
       {
+        "command": "markdownAnnotator.quickHighlight",
+        "key": "ctrl+h",
+        "mac": "cmd+h",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
         "command": "markdownAnnotator.addComment",
         "key": "ctrl+alt+c",
         "mac": "cmd+alt+c",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markdownAnnotator.listAnnotations",
+        "key": "ctrl+alt+l",
+        "mac": "cmd+alt+l",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markdownAnnotator.clearAll",
+        "key": "ctrl+alt+delete",
+        "mac": "cmd+alt+backspace",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markdownAnnotator.exportAnnotations",
+        "key": "ctrl+alt+e",
+        "mac": "cmd+alt+e",
         "when": "editorTextFocus && editorLangId == markdown"
       }
     ],
@@ -67,19 +104,30 @@
         "markdownAnnotator.highlightColor": {
           "type": "string",
           "default": "yellow",
-          "enum": [
-            "yellow",
-            "green",
-            "blue",
-            "pink",
-            "orange"
+          "enum": ["yellow", "green", "blue", "pink", "orange"],
+          "enumDescriptions": [
+            "黄色高亮",
+            "绿色高亮",
+            "蓝色高亮",
+            "粉色高亮",
+            "橙色高亮"
           ],
-          "description": "Default highlight color"
+          "description": "默认高亮颜色（用于快速高亮功能）"
+        },
+        "markdownAnnotator.alwaysShowColorPicker": {
+          "type": "boolean",
+          "default": true,
+          "description": "添加高亮时总是显示颜色选择器（关闭则直接使用默认颜色）"
         },
         "markdownAnnotator.showInPreview": {
           "type": "boolean",
           "default": true,
-          "description": "Show annotations in Markdown preview"
+          "description": "在 Markdown 预览中显示标注（实验性功能）"
+        },
+        "markdownAnnotator.enableShortcuts": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用快捷键（如果与其他扩展冲突，可以关闭后使用命令面板）"
         }
       }
     }
@@ -96,8 +144,8 @@
     "type": "git",
     "url": "git+https://github.com/Jack-Long-2022/vscode-markdown-annotator.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["markdown", "annotation", "highlight", "comment", "note-taking"],
+  "author": "Jack Long",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/Jack-Long-2022/vscode-markdown-annotator/issues"
