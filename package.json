@@ -1,0 +1,92 @@
+{
+  "name": "vscode-markdown-annotator",
+  "displayName": "Markdown Annotator",
+  "description": "Add annotations, highlights and comments to Markdown documents",
+  "version": "0.1.0",
+  "publisher": "jack-long",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:markdown"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "markdownAnnotator.addHighlight",
+        "title": "Markdown Annotator: Add Highlight"
+      },
+      {
+        "command": "markdownAnnotator.addComment",
+        "title": "Markdown Annotator: Add Comment"
+      },
+      {
+        "command": "markdownAnnotator.clearAll",
+        "title": "Markdown Annotator: Clear All Annotations"
+      },
+      {
+        "command": "markdownAnnotator.exportAnnotations",
+        "title": "Markdown Annotator: Export Annotations"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "when": "editorLangId == markdown",
+          "command": "markdownAnnotator.addHighlight",
+          "group": "markdown@1"
+        },
+        {
+          "when": "editorLangId == markdown",
+          "command": "markdownAnnotator.addComment",
+          "group": "markdown@2"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "markdownAnnotator.addHighlight",
+        "key": "ctrl+alt+h",
+        "mac": "cmd+alt+h",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
+        "command": "markdownAnnotator.addComment",
+        "key": "ctrl+alt+c",
+        "mac": "cmd+alt+c",
+        "when": "editorTextFocus && editorLangId == markdown"
+      }
+    ],
+    "configuration": {
+      "title": "Markdown Annotator",
+      "properties": {
+        "markdownAnnotator.highlightColor": {
+          "type": "string",
+          "default": "yellow",
+          "enum": ["yellow", "green", "blue", "pink", "orange"],
+          "description": "Default highlight color"
+        },
+        "markdownAnnotator.showInPreview": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show annotations in Markdown preview"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Jack-Long-2022/vscode-markdown-annotator.git"
+  }
+}
