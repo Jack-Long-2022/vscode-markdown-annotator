@@ -2,7 +2,7 @@
   "name": "vscode-markdown-annotator",
   "displayName": "Markdown Annotator",
   "description": "Add annotations, highlights and comments to Markdown documents",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "publisher": "jack-long",
   "engines": {
     "vscode": "^1.85.0"
@@ -38,7 +38,7 @@
       },
       {
         "command": "markdownAnnotator.exportAnnotations",
-        "title": "📤 导出所有标注"
+        "title": "📤 导出并归档标注"
       }
     ],
     "menus": {
@@ -81,31 +81,15 @@
         "markdownAnnotator.highlightColor": {
           "type": "string",
           "default": "yellow",
-          "enum": [
-            "yellow",
-            "green",
-            "blue",
-            "pink",
-            "orange"
-          ],
+          "enum": ["yellow", "green", "blue", "pink", "orange"],
           "enumDescriptions": [
-            "黄色高亮",
-            "绿色高亮",
-            "蓝色高亮",
-            "粉色高亮",
-            "橙色高亮"
+            "黄色 - 一般重点",
+            "绿色 - 重要/正确",
+            "蓝色 - 信息/参考",
+            "粉色 - 警告/注意",
+            "橙色 - 待办/问题"
           ],
-          "description": "默认高亮颜色（用于快速高亮功能）"
-        },
-        "markdownAnnotator.alwaysShowColorPicker": {
-          "type": "boolean",
-          "default": true,
-          "description": "添加高亮时总是显示颜色选择器（关闭则直接使用默认颜色）"
-        },
-        "markdownAnnotator.showInPreview": {
-          "type": "boolean",
-          "default": true,
-          "description": "在 Markdown 预览中显示标注（实验性功能）"
+          "description": "默认高亮颜色"
         }
       }
     }
@@ -122,13 +106,7 @@
     "type": "git",
     "url": "git+https://github.com/Jack-Long-2022/vscode-markdown-annotator.git"
   },
-  "keywords": [
-    "markdown",
-    "annotation",
-    "highlight",
-    "comment",
-    "note-taking"
-  ],
+  "keywords": ["markdown", "annotation", "highlight", "comment", "note-taking", "ai"],
   "author": "Jack Long",
   "type": "commonjs",
   "bugs": {

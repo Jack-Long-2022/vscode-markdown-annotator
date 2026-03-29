@@ -45,7 +45,7 @@ function activate(context) {
             borderRadius: '3px',
             isWholeLine: false
         }),
-        orange: vscode.window.createTextEditorType({
+        orange: vscode.window.createTextEditorDecorationType({
             backgroundColor: 'rgba(255, 165, 0, 0.35)',
             borderRadius: '3px',
             isWholeLine: false
@@ -68,9 +68,6 @@ function activate(context) {
                 return;
             }
 
-            const config = vscode.workspace.getConfiguration('markdownAnnotator');
-            const defaultColor = config.get('highlightColor') || 'yellow';
-            
             const picked = await vscode.window.showQuickPick(
                 [
                     { label: '🟡 黄色', value: 'yellow' },
@@ -86,7 +83,6 @@ function activate(context) {
             const color = picked.value;
             const range = new vscode.Range(selection.start, selection.end);
             
-            // 获取当前文件已有的高亮，追加新的
             const filePath = editor.document.uri.fsPath;
             const fileAnnotations = annotations.get(filePath) || [];
             const existingRanges = fileAnnotations
@@ -99,7 +95,6 @@ function activate(context) {
             existingRanges.push(range);
             editor.setDecorations(decorationTypes[color], existingRanges);
 
-            // 存储标注
             const annotation = {
                 type: 'highlight',
                 color: color,
@@ -207,7 +202,8 @@ function activate(context) {
             const lineLength = editor.document.lineAt(endLine).text.length;
             const endPosition = new vscode.Position(endLine, lineLength);
 
-            const commentText = `\n<!-- 💬 [${getTimestamp()}] ${comment} -->`;
+            const timestamp = getTimestamp();
+            const commentText = `\n<!-- 💬 [${timestamp}] ${comment} -->`;
 
             await editor.edit(editBuilder => {
                 editBuilder.insert(endPosition, commentText);
@@ -222,6 +218,7 @@ function activate(context) {
                 },
                 text: selectedText,
                 comment: comment,
+                commentTime: timestamp,
                 timestamp: Date.now()
             };
 
@@ -266,12 +263,10 @@ function activate(context) {
             );
 
             if (confirm === '清除高亮') {
-                // 清除所有高亮装饰
                 Object.values(decorationTypes).forEach(type => {
                     editor.setDecorations(type, []);
                 });
 
-                // 只删除高亮记录，保留注释记录
                 const remainingAnnotations = fileAnnotations.filter(a => a.type !== 'highlight');
                 
                 if (remainingAnnotations.length > 0) {
@@ -285,47 +280,137 @@ function activate(context) {
         }
     );
 
-    // ==================== 导出标注 ====================
-    const exportCmd = vscode.commands.registerCommand(
+    // ==================== 导出并清理（归档）====================
+    const exportAndCleanCmd = vscode.commands.registerCommand(
         'markdownAnnotator.exportAnnotations',
         async () => {
-            if (annotations.size === 0) {
-                vscode.window.showWarningMessage('没有可导出的标注');
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) {
+                vscode.window.showWarningMessage('没有打开的文件');
                 return;
             }
 
+            const filePath = editor.document.uri.fsPath;
+            if (!annotations.has(filePath) || annotations.get(filePath).length === 0) {
+                vscode.window.showWarningMessage('当前文件没有标注可导出');
+                return;
+            }
+
+            const fileAnnotations = annotations.get(filePath);
+            const highlights = fileAnnotations.filter(a => a.type === 'highlight');
+            const comments = fileAnnotations.filter(a => a.type === 'comment');
+
+            if (highlights.length === 0 && comments.length === 0) {
+                vscode.window.showWarningMessage('当前文件没有标注可导出');
+                return;
+            }
+
+            const confirm = await vscode.window.showWarningMessage(
+                `导出并归档标注？\n\n🎨 高亮: ${highlights.length} 个\n💬 注释: ${comments.length} 个\n\n导出后：\n- 标注将保存到 JSON 文件\n- Markdown 文件中的注释将被清理\n- 高亮装饰将被清除`,
+                { modal: true },
+                '导出并归档'
+            );
+
+            if (confirm !== '导出并归档') return;
+
+            // 构建导出数据
+            const mdFileName = filePath.split(/[/\\]/).pop();
             const exportData = {
-                exportedAt: getTimestamp(),
-                totalFiles: annotations.size,
-                files: {}
+                _ai_instructions: {
+                    purpose: "此文件包含用户对 Markdown 文档的标注信息，用于 AI 理解和处理",
+                    how_to_read: {
+                        highlights: "高亮标记：用户认为重要的内容，color 字段表示重要性级别",
+                        color_meaning: {
+                            yellow: "一般重点",
+                            green: "重要/正确",
+                            blue: "信息/参考",
+                            pink: "警告/注意",
+                            orange: "待办/问题"
+                        },
+                        comments: "用户注释：对特定内容的理解、疑问或补充说明",
+                        usage: "根据这些标注，AI 可以：1) 总结重点内容 2) 回答相关问题 3) 优化文档结构 4) 提取关键信息"
+                    },
+                    original_file: mdFileName,
+                    exported_at: getTimestamp()
+                },
+                document: {
+                    path: filePath,
+                    name: mdFileName,
+                    annotation_count: {
+                        total: fileAnnotations.length,
+                        highlights: highlights.length,
+                        comments: comments.length
+                    }
+                },
+                annotations: fileAnnotations.map(a => ({
+                    type: a.type,
+                    text: a.text,
+                    location: {
+                        line: a.range.start.line + 1,
+                        start_char: a.range.start.character,
+                        end_char: a.range.end.character
+                    },
+                    ...(a.type === 'highlight' ? { 
+                        color: a.color,
+                        importance: { yellow: 'normal', green: 'important', blue: 'info', pink: 'warning', orange: 'todo' }[a.color]
+                    } : {}),
+                    ...(a.type === 'comment' ? { 
+                        comment: a.comment,
+                        comment_time: a.commentTime
+                    } : {}),
+                    timestamp: a.timestamp
+                }))
             };
 
-            annotations.forEach((value, key) => {
-                const highlights = value.filter(a => a.type === 'highlight');
-                const comments = value.filter(a => a.type === 'comment');
-                exportData.files[key] = {
-                    total: value.length,
-                    highlights: highlights.length,
-                    comments: comments.length,
-                    annotations: value
-                };
-            });
-
-            const jsonStr = JSON.stringify(exportData, null, 2);
-
+            // 保存 JSON 文件
+            const jsonFileName = mdFileName.replace(/\.md$/i, '-annotations.json');
             const uri = await vscode.window.showSaveDialog({
-                defaultUri: vscode.Uri.file(`markdown-annotations-${Date.now()}.json`),
+                defaultUri: vscode.Uri.file(jsonFileName),
                 filters: { 'JSON': ['json'] }
             });
 
-            if (uri) {
-                try {
-                    fs.writeFileSync(uri.fsPath, jsonStr, 'utf8');
-                    vscode.window.showInformationMessage(`✅ 标注已导出到: ${uri.fsPath}`);
-                } catch (err) {
-                    vscode.window.showErrorMessage(`导出失败: ${err.message}`);
-                }
+            if (!uri) return;
+
+            try {
+                fs.writeFileSync(uri.fsPath, JSON.stringify(exportData, null, 2), 'utf8');
+            } catch (err) {
+                vscode.window.showErrorMessage(`导出失败: ${err.message}`);
+                return;
             }
+
+            // 清理 Markdown 文件中的注释（HTML 注释）
+            if (comments.length > 0) {
+                const document = editor.document;
+                const fullText = document.getText();
+                
+                // 匹配 <!-- 💬 [时间] 内容 --> 格式的注释
+                const commentPattern = /\n?<!-- 💬 \[[\d\-: ]+\] .+? -->/g;
+                const cleanedText = fullText.replace(commentPattern, '');
+
+                // 替换整个文件内容
+                const edit = new vscode.WorkspaceEdit();
+                const fullRange = new vscode.Range(
+                    document.positionAt(0),
+                    document.positionAt(fullText.length)
+                );
+                edit.replace(document.uri, fullRange, cleanedText);
+                await vscode.workspace.applyEdit(edit);
+            }
+
+            // 清除高亮装饰
+            Object.values(decorationTypes).forEach(type => {
+                editor.setDecorations(type, []);
+            });
+
+            // 清空内存中的标注
+            annotations.delete(filePath);
+
+            // 保存文件
+            await document.save();
+
+            vscode.window.showInformationMessage(
+                `✅ 已导出 ${fileAnnotations.length} 个标注到 JSON\n✅ Markdown 文件已清理`
+            );
         }
     );
 
@@ -360,7 +445,7 @@ function activate(context) {
             });
 
             const selected = await vscode.window.showQuickPick(items, {
-                placeHolder: `当前文件有 ${fileAnnotations.length} 个标注（${fileAnnotations.filter(a => a.type === 'highlight').length} 个高亮，${fileAnnotations.filter(a => a.type === 'comment').length} 个注释）`
+                placeHolder: `当前文件有 ${fileAnnotations.length} 个标注`
             });
 
             if (selected) {
@@ -376,7 +461,7 @@ function activate(context) {
         addHighlightCmd, 
         addCommentCmd, 
         clearAllCmd, 
-        exportCmd,
+        exportAndCleanCmd,
         quickHighlightCmd,
         listAnnotationsCmd
     );
@@ -388,7 +473,6 @@ function activate(context) {
             if (annotations.has(filePath)) {
                 const fileAnnotations = annotations.get(filePath);
                 
-                // 按颜色分组恢复高亮
                 const colorGroups = {};
                 fileAnnotations.forEach(annotation => {
                     if (annotation.type === 'highlight') {
@@ -404,7 +488,6 @@ function activate(context) {
                     }
                 });
 
-                // 应用每种颜色的高亮
                 Object.entries(colorGroups).forEach(([color, ranges]) => {
                     if (decorationTypes[color]) {
                         editor.setDecorations(decorationTypes[color], ranges);
