@@ -2,7 +2,7 @@
   "name": "vscode-markdown-annotator",
   "displayName": "Markdown Annotator",
   "description": "Add annotations, highlights and comments to Markdown documents",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "publisher": "jack-long",
   "engines": {
     "vscode": "^1.85.0"
@@ -17,109 +17,64 @@
   "contributes": {
     "commands": [
       {
-        "command": "markdownAnnotator.addHighlight",
-        "title": "📝 Markdown Annotator: 添加高亮（选择颜色）"
+        "command": "markdownAnnotator.quickHighlight",
+        "title": "⚡ 快速高亮"
       },
       {
-        "command": "markdownAnnotator.quickHighlight",
-        "title": "⚡ Markdown Annotator: 快速高亮（默认颜色）"
+        "command": "markdownAnnotator.addHighlight",
+        "title": "🎨 选择颜色高亮"
       },
       {
         "command": "markdownAnnotator.addComment",
-        "title": "💬 Markdown Annotator: 添加注释"
+        "title": "💬 添加注释"
       },
       {
         "command": "markdownAnnotator.listAnnotations",
-        "title": "📋 Markdown Annotator: 查看所有标注"
+        "title": "📋 查看所有标注"
       },
       {
         "command": "markdownAnnotator.clearAll",
-        "title": "🗑️ Markdown Annotator: 清除当前文件高亮"
+        "title": "🗑️ 清除当前文件高亮"
       },
       {
         "command": "markdownAnnotator.exportAnnotations",
-        "title": "📤 Markdown Annotator: 导出所有标注"
+        "title": "📤 导出所有标注"
       }
     ],
     "menus": {
       "editor/context": [
         {
-          "when": "editorLangId == markdown",
-          "submenu": "markdownAnnotator.submenu",
-          "group": "markdown@1"
-        }
-      ],
-      "markdownAnnotator.submenu": [
-        {
+          "when": "editorLangId == markdown && editorHasSelection",
           "command": "markdownAnnotator.quickHighlight",
-          "group": "1_highlight@1"
+          "group": "9_cutcopypaste@90"
         },
         {
+          "when": "editorLangId == markdown && editorHasSelection",
           "command": "markdownAnnotator.addHighlight",
-          "group": "1_highlight@2"
+          "group": "9_cutcopypaste@91"
         },
         {
+          "when": "editorLangId == markdown && editorHasSelection",
           "command": "markdownAnnotator.addComment",
-          "group": "2_comment@1"
+          "group": "9_cutcopypaste@92"
         },
         {
+          "when": "editorLangId == markdown",
           "command": "markdownAnnotator.listAnnotations",
-          "group": "3_manage@1"
+          "group": "9_cutcopypaste@93"
         },
         {
+          "when": "editorLangId == markdown",
           "command": "markdownAnnotator.clearAll",
-          "group": "3_manage@2"
+          "group": "9_cutcopypaste@94"
         },
         {
+          "when": "editorLangId == markdown",
           "command": "markdownAnnotator.exportAnnotations",
-          "group": "3_manage@3"
+          "group": "9_cutcopypaste@95"
         }
       ]
     },
-    "submenus": [
-      {
-        "id": "markdownAnnotator.submenu",
-        "label": "📝 Markdown 标注"
-      }
-    ],
-    "keybindings": [
-      {
-        "command": "markdownAnnotator.quickHighlight",
-        "key": "alt+h",
-        "mac": "alt+h",
-        "when": "editorTextFocus && editorLangId == markdown"
-      },
-      {
-        "command": "markdownAnnotator.addHighlight",
-        "key": "alt+shift+h",
-        "mac": "alt+shift+h",
-        "when": "editorTextFocus && editorLangId == markdown"
-      },
-      {
-        "command": "markdownAnnotator.addComment",
-        "key": "alt+shift+c",
-        "mac": "alt+shift+c",
-        "when": "editorTextFocus && editorLangId == markdown"
-      },
-      {
-        "command": "markdownAnnotator.listAnnotations",
-        "key": "alt+l",
-        "mac": "alt+l",
-        "when": "editorTextFocus && editorLangId == markdown"
-      },
-      {
-        "command": "markdownAnnotator.clearAll",
-        "key": "alt+shift+d",
-        "mac": "alt+shift+d",
-        "when": "editorTextFocus && editorLangId == markdown"
-      },
-      {
-        "command": "markdownAnnotator.exportAnnotations",
-        "key": "alt+shift+e",
-        "mac": "alt+shift+e",
-        "when": "editorTextFocus && editorLangId == markdown"
-      }
-    ],
     "configuration": {
       "title": "Markdown Annotator",
       "properties": {
