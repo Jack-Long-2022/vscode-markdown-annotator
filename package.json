@@ -2,7 +2,7 @@
   "name": "vscode-markdown-annotator",
   "displayName": "Markdown Annotator",
   "description": "Add annotations, highlights and comments to Markdown documents",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "jack-long",
   "engines": {
     "vscode": "^1.85.0"
@@ -62,39 +62,39 @@
     },
     "keybindings": [
       {
-        "command": "markdownAnnotator.addHighlight",
-        "key": "ctrl+alt+h",
-        "mac": "cmd+alt+h",
-        "when": "editorTextFocus && editorLangId == markdown"
-      },
-      {
         "command": "markdownAnnotator.quickHighlight",
         "key": "ctrl+h",
         "mac": "cmd+h",
         "when": "editorTextFocus && editorLangId == markdown"
       },
       {
+        "command": "markdownAnnotator.addHighlight",
+        "key": "ctrl+shift+h",
+        "mac": "cmd+shift+h",
+        "when": "editorTextFocus && editorLangId == markdown"
+      },
+      {
         "command": "markdownAnnotator.addComment",
-        "key": "ctrl+alt+c",
-        "mac": "cmd+alt+c",
+        "key": "ctrl+shift+c",
+        "mac": "cmd+shift+c",
         "when": "editorTextFocus && editorLangId == markdown"
       },
       {
         "command": "markdownAnnotator.listAnnotations",
-        "key": "ctrl+alt+l",
-        "mac": "cmd+alt+l",
+        "key": "ctrl+l",
+        "mac": "cmd+l",
         "when": "editorTextFocus && editorLangId == markdown"
       },
       {
         "command": "markdownAnnotator.clearAll",
-        "key": "ctrl+alt+delete",
-        "mac": "cmd+alt+backspace",
+        "key": "ctrl+shift+d",
+        "mac": "cmd+shift+d",
         "when": "editorTextFocus && editorLangId == markdown"
       },
       {
         "command": "markdownAnnotator.exportAnnotations",
-        "key": "ctrl+alt+e",
-        "mac": "cmd+alt+e",
+        "key": "ctrl+shift+e",
+        "mac": "cmd+shift+e",
         "when": "editorTextFocus && editorLangId == markdown"
       }
     ],
@@ -123,11 +123,6 @@
           "type": "boolean",
           "default": true,
           "description": "在 Markdown 预览中显示标注（实验性功能）"
-        },
-        "markdownAnnotator.enableShortcuts": {
-          "type": "boolean",
-          "default": true,
-          "description": "启用快捷键（如果与其他扩展冲突，可以关闭后使用命令面板）"
         }
       }
     }
