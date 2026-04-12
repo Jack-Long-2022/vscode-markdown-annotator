@@ -2,7 +2,7 @@
   "name": "vscode-markdown-annotator",
   "displayName": "Markdown Annotator",
   "description": "Add annotations, highlights and comments to Markdown documents",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "publisher": "jack-long",
   "engines": {
     "vscode": "^1.85.0"
@@ -19,6 +19,26 @@
       {
         "command": "markdownAnnotator.quickHighlight",
         "title": "⚡ 快速高亮"
+      },
+      {
+        "command": "markdownAnnotator.highlightRed",
+        "title": "🔴 红色高亮"
+      },
+      {
+        "command": "markdownAnnotator.highlightYellow",
+        "title": "🟡 黄色高亮"
+      },
+      {
+        "command": "markdownAnnotator.highlightGreen",
+        "title": "🟢 绿色高亮"
+      },
+      {
+        "command": "markdownAnnotator.highlightBlue",
+        "title": "🔵 蓝色高亮"
+      },
+      {
+        "command": "markdownAnnotator.highlightOrange",
+        "title": "🟠 橙色高亮"
       },
       {
         "command": "markdownAnnotator.addHighlight",
@@ -39,9 +59,49 @@
       {
         "command": "markdownAnnotator.exportAnnotations",
         "title": "📤 导出并归档标注"
+      },
+      {
+        "command": "markdownAnnotator.importAnnotations",
+        "title": "📥 导入标注"
       }
     ],
     "keybindings": [
+      {
+        "command": "markdownAnnotator.quickHighlight",
+        "key": "ctrl+alt+h",
+        "mac": "cmd+alt+h",
+        "when": "editorLangId == markdown && editorHasSelection"
+      },
+      {
+        "command": "markdownAnnotator.highlightRed",
+        "key": "ctrl+alt+1",
+        "mac": "cmd+alt+1",
+        "when": "editorLangId == markdown && editorHasSelection"
+      },
+      {
+        "command": "markdownAnnotator.highlightYellow",
+        "key": "ctrl+alt+2",
+        "mac": "cmd+alt+2",
+        "when": "editorLangId == markdown && editorHasSelection"
+      },
+      {
+        "command": "markdownAnnotator.highlightGreen",
+        "key": "ctrl+alt+3",
+        "mac": "cmd+alt+3",
+        "when": "editorLangId == markdown && editorHasSelection"
+      },
+      {
+        "command": "markdownAnnotator.highlightBlue",
+        "key": "ctrl+alt+4",
+        "mac": "cmd+alt+4",
+        "when": "editorLangId == markdown && editorHasSelection"
+      },
+      {
+        "command": "markdownAnnotator.highlightOrange",
+        "key": "ctrl+alt+5",
+        "mac": "cmd+alt+5",
+        "when": "editorLangId == markdown && editorHasSelection"
+      },
       {
         "command": "markdownAnnotator.addComment",
         "key": "ctrl+alt+m",
@@ -55,10 +115,10 @@
         "when": "editorLangId == markdown"
       },
       {
-        "command": "markdownAnnotator.quickHighlight",
-        "key": "ctrl+alt+h",
-        "mac": "cmd+alt+h",
-        "when": "editorLangId == markdown && editorHasSelection"
+        "command": "markdownAnnotator.importAnnotations",
+        "key": "ctrl+alt+i",
+        "mac": "cmd+alt+i",
+        "when": "editorLangId == markdown"
       }
     ],
     "menus": {
@@ -92,6 +152,11 @@
           "when": "editorLangId == markdown",
           "command": "markdownAnnotator.exportAnnotations",
           "group": "9_cutcopypaste@95"
+        },
+        {
+          "when": "editorLangId == markdown",
+          "command": "markdownAnnotator.importAnnotations",
+          "group": "9_cutcopypaste@96"
         }
       ]
     },
@@ -101,12 +166,12 @@
         "markdownAnnotator.highlightColor": {
           "type": "string",
           "default": "yellow",
-          "enum": ["yellow", "green", "blue", "pink", "orange"],
+          "enum": ["red", "yellow", "green", "blue", "orange"],
           "enumDescriptions": [
+            "红色 - 重要/关键",
             "黄色 - 一般重点",
-            "绿色 - 重要/正确",
+            "绿色 - 正确/确认",
             "蓝色 - 信息/参考",
-            "粉色 - 警告/注意",
             "橙色 - 待办/问题"
           ],
           "description": "默认高亮颜色"
