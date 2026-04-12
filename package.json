@@ -104,8 +104,8 @@
       },
       {
         "command": "markdownAnnotator.addComment",
-        "key": "ctrl+alt+m",
-        "mac": "cmd+alt+m",
+        "key": "ctrl+alt+=",
+        "mac": "cmd+alt+=",
         "when": "editorLangId == markdown && editorHasSelection"
       },
       {

@@ -27,7 +27,7 @@ VS Code Markdown 标注插件 —— 添加高亮、注释，导出为 AI 可读
 | 绿色高亮 | `Ctrl+Alt+3` | `Cmd+Alt+3` | 绿色高亮 |
 | 蓝色高亮 | `Ctrl+Alt+4` | `Cmd+Alt+4` | 蓝色高亮 |
 | 橙色高亮 | `Ctrl+Alt+5` | `Cmd+Alt+5` | 橙色高亮 |
-| 添加注释 | `Ctrl+Alt+M` | `Cmd+Alt+M` | 添加文字标注 |
+| 添加注释 | `Ctrl+Alt+=` | `Cmd+Alt+=` | 添加文字标注 |
 | 导出归档 | `Ctrl+Alt+E` | `Cmd+Alt+E` | 导出 + 清理 |
 | 导入标注 | `Ctrl+Alt+I` | `Cmd+Alt+I` | 导入恢复标注 |
 
@@ -130,7 +130,7 @@ VS Code Markdown 标注插件 —— 添加高亮、注释，导出为 AI 可读
 │                                                    │
 │  1️⃣ 阅读文档，标注重点                             │
 │      - 选中文字 → Ctrl+Alt+1~5 快捷高亮            │
-│      - 选中文字 → Ctrl+Alt+M 添加注释              │
+│      - 选中文字 → Ctrl+Alt+= 添加注释              │
 │      ↓                                             │
 │  2️⃣ 继续阅读，持续标注                             │
 │      - Ctrl+Alt+H 快速黄色高亮                     │
