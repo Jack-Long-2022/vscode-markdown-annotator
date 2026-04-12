@@ -364,6 +364,7 @@ function activate(context) {
 
             // 保存 JSON 文件
             const jsonFileName = mdFileName.replace(/\.md$/i, '-annotations.json');
+            const mdSummaryFileName = mdFileName.replace(/\.md$/i, '-annotations.md');
             const uri = await vscode.window.showSaveDialog({
                 defaultUri: vscode.Uri.file(jsonFileName),
                 filters: { 'JSON': ['json'] }
@@ -373,6 +374,11 @@ function activate(context) {
 
             try {
                 fs.writeFileSync(uri.fsPath, JSON.stringify(exportData, null, 2), 'utf8');
+                
+                // 生成 Markdown 摘要文件
+                const mdSummaryPath = uri.fsPath.replace(/\.json$/i, '.md');
+                const mdSummary = generateMdSummary(exportData, mdFileName);
+                fs.writeFileSync(mdSummaryPath, mdSummary, 'utf8');
             } catch (err) {
                 vscode.window.showErrorMessage(`导出失败: ${err.message}`);
                 return;
@@ -409,10 +415,79 @@ function activate(context) {
             await document.save();
 
             vscode.window.showInformationMessage(
-                `✅ 已导出 ${fileAnnotations.length} 个标注到 JSON\n✅ Markdown 文件已清理`
+                `✅ 已导出 ${fileAnnotations.length} 个标注\n📄 JSON + 📝 Markdown摘要\n✅ Markdown 文件已清理`
             );
         }
     );
+
+    // ==================== 生成 Markdown 摘要 ====================
+    function generateMdSummary(data, docName) {
+        const lines = [];
+        const colorLabels = {
+            yellow: '一般重点',
+            green: '重要/正确',
+            blue: '信息/参考',
+            pink: '警告/注意',
+            orange: '待办/问题'
+        };
+
+        lines.push('# 决策摘要\n');
+        lines.push(`> 来源文档：\`${docName}\`\n`);
+        lines.push(`> 导出时间：${data._ai_instructions.exported_at}\n`);
+
+        const annotations = data.annotations || [];
+        const comments = annotations.filter(a => a.type === 'comment');
+        const highlights = annotations.filter(a => a.type === 'highlight');
+
+        lines.push(`\n---\n`);
+        lines.push(`## 统计\n`);
+        lines.push(`- 📄 文件：${data.document.name}\n`);
+        lines.push(`- 🎨 高亮：${highlights.length} 个\n`);
+        lines.push(`- 💬 注释：${comments.length} 个\n`);
+        lines.push(`- 📊 总计：${annotations.length} 个标注\n`);
+
+        if (annotations.length > 0) {
+            lines.push(`\n---\n`);
+            lines.push(`## 标注详情\n`);
+
+            // 按行号排序
+            const sortedAnnotations = [...annotations].sort(
+                (a, b) => (a.location?.line || 0) - (b.location?.line || 0)
+            );
+
+            sortedAnnotations.forEach((ann, index) => {
+                const lineNum = ann.location?.line || '?';
+                const original = (ann.text || '').trim();
+                const shortOriginal = original.length > 50 
+                    ? original.substring(0, 50) + '...' 
+                    : original;
+
+                if (ann.type === 'comment') {
+                    const comment = (ann.comment || '').trim();
+                    lines.push(`\n### ${index + 1}. 💬 注释 @ 第${lineNum}行\n`);
+                    lines.push(`**标注内容：**\n`);
+                    lines.push(`> ${shortOriginal}\n`);
+                    lines.push(`\n**决策/回复：**\n`);
+                    lines.push(`${comment}\n`);
+                    if (ann.comment_time) {
+                        lines.push(`\n*${ann.comment_time}*\n`);
+                    }
+                } else if (ann.type === 'highlight') {
+                    const colorLabel = colorLabels[ann.color] || ann.color;
+                    const importance = ann.importance || 'normal';
+                    lines.push(`\n### ${index + 1}. 🎨 高亮 [${colorLabel}] @ 第${lineNum}行\n`);
+                    lines.push(`> ${shortOriginal}\n`);
+                    if (ann.comment) {
+                        lines.push(`\n**备注：** ${ann.comment}\n`);
+                    }
+                }
+                lines.push(`\n---\n`);
+            });
+        }
+
+        lines.push(`\n> 💡 此摘要由 Markdown Annotator 自动生成\n`);
+        return lines.join('');
+    }
 
     // ==================== 查看所有标注 ====================
     const listAnnotationsCmd = vscode.commands.registerCommand(

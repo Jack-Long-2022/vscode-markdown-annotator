@@ -2,7 +2,7 @@
   "name": "vscode-markdown-annotator",
   "displayName": "Markdown Annotator",
   "description": "Add annotations, highlights and comments to Markdown documents",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "publisher": "jack-long",
   "engines": {
     "vscode": "^1.85.0"
@@ -39,6 +39,26 @@
       {
         "command": "markdownAnnotator.exportAnnotations",
         "title": "📤 导出并归档标注"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "markdownAnnotator.addComment",
+        "key": "ctrl+alt+m",
+        "mac": "cmd+alt+m",
+        "when": "editorLangId == markdown && editorHasSelection"
+      },
+      {
+        "command": "markdownAnnotator.exportAnnotations",
+        "key": "ctrl+alt+e",
+        "mac": "cmd+alt+e",
+        "when": "editorLangId == markdown"
+      },
+      {
+        "command": "markdownAnnotator.quickHighlight",
+        "key": "ctrl+alt+h",
+        "mac": "cmd+alt+h",
+        "when": "editorLangId == markdown && editorHasSelection"
       }
     ],
     "menus": {
